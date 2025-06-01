@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentEase - Water Bills Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reused styles from dashboard */
+        .sidebar {
+            transition: all 0.3s;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar.collapsed .sidebar-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+        }
+        .content-area {
+            transition: all 0.3s;
+        }
+        .content-area.expanded {
+            margin-left: 80px;
+        }
+        .water-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+        .consumption-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e5e7eb;
+            overflow: hidden;
+        }
+        .consumption-fill {
+            height: 100%;
+            background-color: #3b82f6;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                z-index: 50;
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .content-area {
+                margin-left: 0 !important;
+            }
+        }
+           /* Add to <style> section */
+         @media (max-width: 768px) {
+        .table-header { display: none; }
+         td { display: block; }
+        }
+    </style>
+</head>
+<script>
+    // Check for saved theme preference when any page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const darkModeEnabled = localStorage.getItem('darkMode') === 'enabled';
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        
+        // Apply theme if enabled
+        if (darkModeEnabled) {
+            document.documentElement.classList.add('dark-mode');
+            if (darkModeToggle) darkModeToggle.checked = true;
+        }
+        
+        // Theme toggle functionality (only add if toggle exists on page)
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.documentElement.classList.add('dark-mode');
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    document.documentElement.classList.remove('dark-mode');
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+            });
+        }
+    });
+</script>
+<body class="bg-gray-100 font-sans">
+    <!-- Mobile Menu Button -->
+    <div class="md:hidden fixed top-4 left-4 z-50">
+        <button id="mobileMenuBtn" class="p-2 rounded-md bg-blue-600 text-white">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar (Same as Dashboard) -->
+    <div id="sidebar" class="sidebar fixed h-screen bg-blue-800 text-white w-64 flex flex-col">
+        <!-- Logo -->
+        <div class="p-4 flex items-center space-x-2 border-b border-blue-700">
+            <i class="fas fa-home text-2xl"></i>
+            <span class="logo-text text-xl font-bold">RentEase</span>
+        </div>
+
+        <!-- User Profile -->
+        <div class="p-4 flex items-center space-x-3 border-b border-blue-700">
+            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="sidebar-text">
+                <div class="font-medium">Admin User</div>
+                <div class="text-xs text-blue-200">Landlord</div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1 px-2">
+                <li>
+                    <a href="dashboard.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="tenants.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-users"></i>
+                        <span class="sidebar-text">Tenants</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="properties.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-home"></i>
+                        <span class="sidebar-text">Properties</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="rentpayments.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span class="sidebar-text">Rent Payments</span>
+                        <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">3 New</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-tint"></i>
+                        <span class="sidebar-text">Water Bills</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="notifications.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-envelope"></i>
+                        <span class="sidebar-text">Email Notifications</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="statements.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span class="sidebar-text">Statements</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-cog"></i>
+                        <span class="sidebar-text">Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Collapse Button -->
+        <div class="p-4 border-t border-blue-700">
+            <button id="toggleSidebar" class="flex items-center space-x-3 text-blue-200 hover:text-white">
+                <i class="fas fa-chevron-left"></i>
+                <span class="sidebar-text">Collapse</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="contentArea" class="content-area min-h-screen ml-64">
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm">
+            <div class="flex justify-between items-center p-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Water Bills Management</h1>
+                    <p class="text-sm text-gray-500">Record meter readings and calculate water bills</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="newReadingBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                        <i class="fas fa-plus mr-2"></i> New Reading
+                    </button>
+                    <div class="relative">
+                        <button class="p-2 rounded-full hover:bg-gray-100">
+                            <i class="fas fa-bell text-gray-600"></i>
+                            <span class="notification-badge bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-6">
+            <!-- Water Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="water-card bg-white rounded-lg shadow p-6 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500">Total Consumption</p>
+                            <h3 class="text-2xl font-bold">1,240 <span class="text-lg">units</span></h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm text-green-600">
+                        <i class="fas fa-arrow-up"></i> 8% from last month
+                    </div>
+                </div>
+                <div class="water-card bg-white rounded-lg shadow p-6 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500">Total Billed</p>
+                            <h3 class="text-2xl font-bold">KSh 24,800</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-green-100 text-green-600">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Avg. Rate</span>
+                            <span class="font-medium">KSh 20/unit</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="water-card bg-white rounded-lg shadow p-6 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500">Unpaid Bills</p>
+                            <h3 class="text-2xl font-bold">KSh 8,400</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm text-red-600">
+                        <i class="fas fa-exclamation-circle"></i> 5 tenants
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Reading Modal (Hidden by default) -->
+            <div id="readingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                    <div class="p-4 border-b flex justify-between items-center">
+                        <h3 class="text-lg font-semibold">Record New Water Reading</h3>
+                        <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Property/Unit</label>
+                            <select id="propertySelect" class="w-full border rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select Property</option>
+                                <option value="unit4b">Garden Apartments - Unit 4B</option>
+                                <option value="unit7a">Garden Apartments - Unit 7A</option>
+                                <option value="westlands">Westlands Office Suite</option>
+                                <option value="mombasa">Mombasa Beach House</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Previous Reading</label>
+                                <input type="number" id="prevReading" class="w-full border rounded-lg px-4 py-2 bg-gray-100" readonly>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Current Reading</label>
+                                <input type="number" id="currReading" class="w-full border rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Price Per Unit (KSh)</label>
+                            <input type="number" id="unitPrice" class="w-full border rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500" value="20">
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-sm text-gray-600">Consumption</span>
+                                <span id="consumption" class="font-medium">0 units</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Total Amount</span>
+                                <span id="totalAmount" class="font-medium text-blue-600">KSh 0</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button id="cancelReading" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                                Cancel
+                            </button>
+                            <button id="saveReading" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                Save Reading
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Water Bill Calculator -->
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <h2 class="text-lg font-semibold mb-4">Current Month Readings</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property/Unit</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tenant</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Readings</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consumption</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="readingsTable">
+                            <!-- Sample Row 1 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="font-medium">Garden Apts - Unit 4B</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-2">
+                                            <i class="fas fa-user text-sm"></i>
+                                        </div>
+                                        <span>Sarah Johnson</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm">
+                                        <span class="text-gray-500">Prev:</span> 1240
+                                        <span class="mx-1">→</span>
+                                        <span class="text-gray-500">Curr:</span> 1285
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div>
+                                        <div class="font-medium">45 units</div>
+                                        <div class="consumption-bar mt-1">
+                                            <div class="consumption-fill" style="width: 60%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm">KSh 20/unit</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="font-medium">KSh 900</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Paid</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-purple-600 hover:text-purple-800">
+                                            <i class="fas fa-print"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Sample Row 2 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="font-medium">Garden Apts - Unit 7A</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-2">
+                                            <i class="fas fa-user text-sm"></i>
+                                        </div>
+                                        <span>Mike Johnson</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm">
+                                        <span class="text-gray-500">Prev:</span> 980
+                                        <span class="mx-1">→</span>
+                                        <span class="text-gray-500">Curr:</span> 1020
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div>
+                                        <div class="font-medium">40 units</div>
+                                        <div class="consumption-bar mt-1">
+                                            <div class="consumption-fill" style="width: 53%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm">KSh 20/unit</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="font-medium">KSh 800</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-green-600 hover:text-green-800">
+                                            <i class="fas fa-envelope"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Sample Row 3 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="font-medium">Westlands Office</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-2">
+                                            <i class="fas fa-building text-sm"></i>
+                                        </div>
+                                        <span>Tech Solutions Ltd</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm">
+                                        <span class="text-gray-500">Prev:</span> 2450
+                                        <span class="mx-1">→</span>
+                                        <span class="text-gray-500">Curr:</span> 2580
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div>
+                                        <div class="font-medium">130 units</div>
+                                        <div class="consumption-bar mt-1">
+                                            <div class="consumption-fill" style="width: 85%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm">KSh 25/unit</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="font-medium">KSh 3,250</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Overdue</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-800">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-4 border-t flex items-center justify-between">
+                    <div class="text-sm text-gray-500">Showing 1 to 3 of 12 readings</div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 border rounded-lg hover:bg-gray-50">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="px-3 py-1 border rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                            1
+                        </button>
+                        <button class="px-3 py-1 border rounded-lg hover:bg-gray-50">
+                            2
+                        </button>
+                        <button class="px-3 py-1 border rounded-lg hover:bg-gray-50">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Water Consumption Trends -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Consumption Chart -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold mb-4">Monthly Consumption Trend</h2>
+                    <div class="h-64 flex items-center justify-center bg-gray-100 rounded-lg">
+                        <!-- Chart placeholder - would be replaced with Chart.js in implementation -->
+                        <div class="text-center text-gray-500">
+                            <i class="fas fa-chart-line text-4xl mb-2"></i>
+                            <p>Water consumption chart</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-between text-sm text-gray-600">
+                        <span>Oct: 1,240 units</span>
+                        <span>Sep: 1,150 units (+7.8%)</span>
+                        <span>Aug: 1,080 units (+6.5%)</span>
+                    </div>
+                </div>
+                
+                <!-- Bulk Actions -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold mb-4">Bulk Water Bill Actions</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button class="p-4 border rounded-lg hover:bg-blue-50 transition-colors flex flex-col items-center">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-2">
+                                <i class="fas fa-file-export"></i>
+                            </div>
+                            <span class="text-sm font-medium">Export Bills</span>
+                            <span class="text-xs text-gray-500">PDF or Excel</span>
+                        </button>
+                        <button class="p-4 border rounded-lg hover:bg-green-50 transition-colors flex flex-col items-center">
+                            <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-2">
+                                <i class="fas fa-paper-plane"></i>
+                            </div>
+                            <span class="text-sm font-medium">Send All</span>
+                            <span class="text-xs text-gray-500">Email statements</span>
+                        </button>
+                        <button class="p-4 border rounded-lg hover:bg-yellow-50 transition-colors flex flex-col items-center">
+                            <div class="w-12 h-12 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center mb-2">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <span class="text-sm font-medium">Reminders</span>
+                            <span class="text-xs text-gray-500">Unpaid bills</span>
+                        </button>
+                        <button class="p-4 border rounded-lg hover:bg-purple-50 transition-colors flex flex-col items-center">
+                            <div class="w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-2">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <span class="text-sm font-medium">Settings</span>
+                            <span class="text-xs text-gray-500">Rates & defaults</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Same sidebar toggle functionality as dashboard
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('contentArea').classList.toggle('expanded');
+        });
+
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+
+        // Water card hover effects
+        const waterCards = document.querySelectorAll('.water-card');
+        waterCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px)';
+                this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+                this.style.boxShadow = '';
+            });
+        });
+
+        // Modal handling for new readings
+        const modal = document.getElementById('readingModal');
+        const newReadingBtn = document.getElementById('newReadingBtn');
+        const closeModal = document.getElementById('closeModal');
+        const cancelReading = document.getElementById('cancelReading');
+        
+        newReadingBtn.addEventListener('click', function() {
+            modal.classList.remove('hidden');
+        });
+        
+        closeModal.addEventListener('click', function() {
+            modal.classList.add('hidden');
+        });
+        
+        cancelReading.addEventListener('click', function() {
+            modal.classList.add('hidden');
+        });
+
+        // Water bill calculation logic
+        const currReading = document.getElementById('currReading');
+        const prevReading = document.getElementById('prevReading');
+        const unitPrice = document.getElementById('unitPrice');
+        const consumptionDisplay = document.getElementById('consumption');
+        const totalAmountDisplay = document.getElementById('totalAmount');
+        const propertySelect = document.getElementById('propertySelect');
+
+        // Update previous reading when property is selected
+        propertySelect.addEventListener('change', function() {
+            // In a real app, this would fetch the previous reading from your database
+            const propertyReadings = {
+                'unit4b': 1285,
+                'unit7a': 1020,
+                'westlands': 2580,
+                'mombasa': 750
+            };
+            prevReading.value = propertyReadings[this.value] || '';
+        });
+
+        // Calculate consumption and amount when inputs change
+        function calculateWaterBill() {
+            const current = parseFloat(currReading.value) || 0;
+            const previous = parseFloat(prevReading.value) || 0;
+            const price = parseFloat(unitPrice.value) || 0;
+            
+            const consumption = current - previous;
+            const totalAmount = consumption * price;
+            
+            consumptionDisplay.textContent = consumption + ' units';
+            totalAmountDisplay.textContent = 'KSh ' + totalAmount.toFixed(2);
+        }
+
+        currReading.addEventListener('input', calculateWaterBill);
+        unitPrice.addEventListener('input', calculateWaterBill);
+
+        // Save reading functionality
+        document.getElementById('saveReading').addEventListener('click', function() {
+            // In a real app, this would save to your database
+            alert('Reading saved successfully!');
+            modal.classList.add('hidden');
+            // Reset form
+            currReading.value = '';
+            calculateWaterBill();
+        });
+    </script>
+</body>
+</html>

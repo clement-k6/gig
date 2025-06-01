@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentEase - System Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css"> <!-- Add this line -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reused styles from dashboard */
+        .sidebar {
+            transition: all 0.3s;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar.collapsed .sidebar-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+        }
+        .content-area {
+            transition: all 0.3s;
+        }
+        .content-area.expanded {
+            margin-left: 80px;
+        }
+        .settings-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #3b82f6;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #3b82f6;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                z-index: 50;
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .content-area {
+                margin-left: 0 !important;
+            }
+        }
+
+        /* Dark mode styles */
+        .dark-mode body {
+            background-color: #1a202c;
+            color: #f7fafc;
+        }
+        .dark-mode .sidebar {
+            background-color: #2d3748;
+            border-color: #4a5568;
+        }
+        .dark-mode .content-area {
+            background-color: #1a202c;
+        }
+        .dark-mode header {
+            background-color: #2d3748;
+            border-color: #4a5568;
+            color: #f7fafc;
+        }
+        .dark-mode .settings-card,
+        .dark-mode .bg-white {
+            background-color: #2d3748;
+            border-color: #4a5568;
+            color: #f7fafc;
+        }
+        .dark-mode .text-gray-800,
+        .dark-mode .text-gray-700,
+        .dark-mode .text-gray-500 {
+            color: #cbd5e0;
+        }
+        .dark-mode .border-gray-200 {
+            border-color: #4a5568;
+        }
+        .dark-mode .bg-gray-100 {
+            background-color: #4a5568;
+        }
+        .dark-mode .bg-gray-50 {
+            background-color: #2d3748;
+        }
+           /* Add to <style> section */
+         @media (max-width: 768px) {
+        .table-header { display: none; }
+         td { display: block; }
+        }
+    </style>
+</head>
+<script>
+    // Check for saved theme preference when any page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const darkModeEnabled = localStorage.getItem('darkMode') === 'enabled';
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        
+        // Apply theme if enabled
+        if (darkModeEnabled) {
+            document.documentElement.classList.add('dark-mode');
+            if (darkModeToggle) darkModeToggle.checked = true;
+        }
+        
+        // Theme toggle functionality (only add if toggle exists on page)
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.documentElement.classList.add('dark-mode');
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    document.documentElement.classList.remove('dark-mode');
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+            });
+        }
+    });
+</script>
+<body class="bg-gray-100 font-sans">
+    <!-- Mobile Menu Button -->
+    <div class="md:hidden fixed top-4 left-4 z-50">
+        <button id="mobileMenuBtn" class="p-2 rounded-md bg-blue-600 text-white">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar (Same as Dashboard) -->
+    <div id="sidebar" class="sidebar fixed h-screen bg-blue-800 text-white w-64 flex flex-col">
+        <!-- Logo -->
+        <div class="p-4 flex items-center space-x-2 border-b border-blue-700">
+            <i class="fas fa-home text-2xl"></i>
+            <span class="logo-text text-xl font-bold">RentEase</span>
+        </div>
+
+        <!-- User Profile -->
+        <div class="p-4 flex items-center space-x-3 border-b border-blue-700">
+            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="sidebar-text">
+                <div class="font-medium">Admin User</div>
+                <div class="text-xs text-blue-200">Landlord</div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1 px-2">
+                <li>
+                    <a href="dashboard.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg bg-blue-700">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="tenants.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-users"></i>
+                        <span class="sidebar-text">Tenants</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="properties.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-home"></i>
+                        <span class="sidebar-text">Properties</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="rentpayments.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span class="sidebar-text">Rent Payments</span>
+                        <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">3 New</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="waterbills.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-tint"></i>
+                        <span class="sidebar-text">Water Bills</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="notifications.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-envelope"></i>
+                        <span class="sidebar-text">Email Notifications</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="statements.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span class="sidebar-text">Statements</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-cog"></i>
+                        <span class="sidebar-text">Settings</span>
+                    </a>
+                </li>
+                <!-- Other menu items same as dashboard -->
+            </ul>
+        </nav>
+
+        <!-- Collapse Button -->
+        <div class="p-4 border-t border-blue-700">
+            <button id="toggleSidebar" class="flex items-center space-x-3 text-blue-200 hover:text-white">
+                <i class="fas fa-chevron-left"></i>
+                <span class="sidebar-text">Collapse</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="contentArea" class="content-area min-h-screen ml-64">
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm">
+            <div class="flex justify-between items-center p-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">System Settings</h1>
+                    <p class="text-sm text-gray-500">Configure your RentEase application</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button class="p-2 rounded-full hover:bg-gray-100">
+                            <i class="fas fa-bell text-gray-600"></i>
+                            <span class="notification-badge bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-6">
+            <!-- Settings Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                <!-- Appearance Settings -->
+                <div class="settings-card bg-white rounded-lg shadow p-6 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold">
+                            <i class="fas fa-palette text-blue-500 mr-2"></i>
+                            Appearance
+                        </h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Dark Mode</label>
+                                <p class="text-xs text-gray-500">Switch between light and dark theme</p>
+                            </div>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                                <input type="checkbox" id="darkModeToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                <label for="darkModeToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Primary Color</label>
+                            <div class="flex space-x-2 mt-1">
+                                <button class="w-8 h-8 rounded-full bg-blue-600 border-2 border-blue-800"></button>
+                                <button class="w-8 h-8 rounded-full bg-green-600"></button>
+                                <button class="w-8 h-8 rounded-full bg-purple-600"></button>
+                                <button class="w-8 h-8 rounded-full bg-red-600"></button>
+                                <button class="w-8 h-8 rounded-full bg-indigo-600"></button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Font Size</label>
+                            <select class="w-full border rounded-lg px-4 py-2 mt-1 text-sm">
+                                <option>Default</option>
+                                <option>Large</option>
+                                <option>Extra Large</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="settings-card bg-white rounded-lg shadow p-6 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold">
+                            <i class="fas fa-bell text-blue-500 mr-2"></i>
+                            Notifications
+                        </h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Email Notifications</label>
+                                <p class="text-xs text-gray-500">Receive email alerts</p>
+                            </div>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                                <input type="checkbox" id="emailToggle" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                <label for="emailToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-blue-600 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">SMS Alerts</label>
+                                <p class="text-xs text-gray-500">Receive text message alerts</p>
+                            </div>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                                <input type="checkbox" id="smsToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                <label for="smsToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">In-App Notifications</label>
+                                <p class="text-xs text-gray-500">Show notification badges</p>
+                            </div>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                                <input type="checkbox" id="appToggle" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                <label for="appToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-blue-600 cursor-pointer"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Settings -->
+                <div class="settings-card bg-white rounded-lg shadow p-6 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold">
+                            <i class="fas fa-money-bill-wave text-blue-500 mr-2"></i>
+                            Payment Settings
+                        </h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Default Water Rate</label>
+                            <div class="relative mt-1">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500">KSh</span>
+                                </div>
+                                <input type="number" class="block w-full pl-12 pr-12 py-2 border rounded-lg" value="20">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500">/unit</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Grace Period</label>
+                            <select class="w-full border rounded-lg px-4 py-2 mt-1 text-sm">
+                                <option>5 days</option>
+                                <option>7 days (default)</option>
+                                <option>10 days</option>
+                                <option>14 days</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Late Fee</label>
+                            <div class="relative mt-1">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500">KSh</span>
+                                </div>
+                                <input type="number" class="block w-full pl-12 pr-12 py-2 border rounded-lg" value="500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MPESA Integration -->
+                <div class="settings-card bg-white rounded-lg shadow p-6 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold">
+                            <i class="fas fa-mobile-alt text-blue-500 mr-2"></i>
+                            MPESA Integration
+                        </h2>
+                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Connected</span>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Business Short Code</label>
+                            <input type="text" class="w-full border rounded-lg px-4 py-2 mt-1" value="123456">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Passkey</label>
+                            <div class="relative">
+                                <input type="password" class="w-full border rounded-lg px-4 py-2 mt-1 pr-10" value="s3cr3tp@ss">
+                                <button class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    <i class="fas fa-eye text-gray-400 hover:text-gray-600"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Auto-confirm Payments</label>
+                                <p class="text-xs text-gray-500">Automatically verify MPESA transactions</p>
+                            </div>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                                <input type="checkbox" id="mpesaAutoToggle" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                <label for="mpesaAutoToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-blue-600 cursor-pointer"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Templates -->
+                <div class="settings-card bg-white rounded-lg shadow p-6 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold">
+                            <i class="fas fa-envelope text-blue-500 mr-2"></i>
+                            Email Templates
+                        </h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Default From Address</label>
+                            <input type="email" class="w-full border rounded-lg px-4 py-2 mt-1" value="noreply@rentease.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Statement Template</label>
+                            <select class="w-full border rounded-lg px-4 py-2 mt-1 text-sm">
+                                <option>Default</option>
+                                <option>Professional</option>
+                                <option>Simple</option>
+                                <option>Custom</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Reminder Template</label>
+                            <select class="w-full border rounded-lg px-4 py-2 mt-1 text-sm">
+                                <option>Friendly</option>
+                                <option>Formal</option>
+                                <option>Urgent</option>
+                                <option>Custom</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backup & Security -->
+                <div class="settings-card bg-white rounded-lg shadow p-6 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold">
+                            <i class="fas fa-shield-alt text-blue-500 mr-2"></i>
+                            Security & Backup
+                        </h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Two-Factor Auth</label>
+                                <p class="text-xs text-gray-500">Require 2FA for admin login</p>
+                            </div>
+                            <div class="relative inline-block w-10 mr-2 align-middle select-none">
+                                <input type="checkbox" id="twoFactorToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                <label for="twoFactorToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Auto Backup</label>
+                            <select class="w-full border rounded-lg px-4 py-2 mt-1 text-sm">
+                                <option>Daily</option>
+                                <option>Weekly</option>
+                                <option>Monthly</option>
+                                <option>Disabled</option>
+                            </select>
+                        </div>
+                        <button class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+                            <i class="fas fa-download mr-2"></i> Download Backup
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="bg-white rounded-lg shadow p-6 border border-red-200">
+                <h2 class="text-lg font-semibold text-red-600 mb-4">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Danger Zone
+                </h2>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <label class="block text-sm font-medium text-red-600 mb-1">Reset All Settings</label>
+                            <p class="text-xs text-gray-500">Revert all settings to default values</p>
+                        </div>
+                        <button class="px-4 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors">
+                            Reset
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <label class="block text-sm font-medium text-red-600 mb-1">Delete All Data</label>
+                            <p class="text-xs text-gray-500">Permanently remove all tenant and payment data</p>
+                        </div>
+                        <button class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                            Delete All
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <label class="block text-sm font-medium text-red-600 mb-1">Deactivate Account</label>
+                            <p class="text-xs text-gray-500">Temporarily disable your RentEase account</p>
+                        </div>
+                        <button class="px-4 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors">
+                            Deactivate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Same sidebar toggle functionality as dashboard
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('contentArea').classList.toggle('expanded');
+        });
+
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+
+        // Settings card hover effects
+        const settingsCards = document.querySelectorAll('.settings-card');
+        settingsCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px)';
+                this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+                this.style.boxShadow = '';
+            });
+        });
+
+        // Dark mode toggle functionality
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        darkModeToggle.addEventListener('change', function() {
+            if(this.checked) {
+                document.documentElement.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        });
+
+        // Check for saved dark mode preference
+        if(localStorage.getItem('darkMode') === 'enabled') {
+            darkModeToggle.checked = true;
+            document.documentElement.classList.add('dark-mode');
+        }
+
+        // Toggle password visibility
+        document.querySelectorAll('.fa-eye').forEach(icon => {
+            icon.addEventListener('click', function() {
+                const input = this.closest('.relative').querySelector('input');
+                if(input.type === 'password') {
+                    input.type = 'text';
+                    this.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    this.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            });
+        });
+
+        // Reset settings confirmation
+        document.querySelectorAll('.border-red-500').forEach(button => {
+            button.addEventListener('click', function() {
+                if(confirm('Are you sure you want to reset all settings to default values?')) {
+                    alert('Settings have been reset to default values');
+                }
+            });
+        });
+
+        // Delete all data confirmation
+        document.querySelector('.bg-red-600').addEventListener('click', function(e) {
+            if(!confirm('WARNING: This will permanently delete all tenant and payment data. Are you absolutely sure?')) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

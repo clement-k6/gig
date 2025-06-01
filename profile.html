@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentEase - Tenant Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Main Content -->
+    <div id="contentArea" class="content-area min-h-screen ml-64">
+        <header class="bg-white shadow-sm dark:bg-gray-800">
+            <div class="flex justify-between items-center p-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Tenant Profile</h1>
+                    <nav class="flex space-x-2 text-sm">
+                        <a href="tenants.html" class="text-blue-600 dark:text-blue-400">Tenants</a>
+                        <span>/</span>
+                        <span class="text-gray-500">John Doe</span>
+                    </nav>
+                </div>
+                <div class="flex space-x-4">
+                    <button id="editProfileBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-edit mr-2"></i> Edit Profile
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="p-6">
+            <!-- Profile Header -->
+            <div class="bg-white rounded-lg shadow overflow-hidden dark:bg-gray-800 mb-6" id="profileHeader">
+                <div class="p-6 flex flex-col md:flex-row items-start md:items-center gap-6">
+                    <div class="relative">
+                        <div class="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-3xl dark:bg-blue-900 dark:text-blue-300">
+                            JD
+                        </div>
+                        <span class="absolute bottom-0 right-0 w-6 h-6 bg-green-500 rounded-full border-2 border-white"></span>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white" id="tenantName">John Doe</h2>
+                        <div class="flex flex-wrap gap-x-4 gap-y-2 mt-2">
+                            <div class="flex items-center text-gray-600 dark:text-gray-300">
+                                <i class="fas fa-home mr-2"></i>
+                                <span data-field="property" id="tenantProperty">Garden Apts - Unit 4B</span>
+                            </div>
+                            <div class="flex items-center text-gray-600 dark:text-gray-300">
+                                <i class="fas fa-phone mr-2"></i>
+                                <span data-field="phone" id="tenantPhone">+254 712 345 678</span>
+                            </div>
+                            <div class="flex items-center text-gray-600 dark:text-gray-300">
+                                <i class="fas fa-envelope mr-2"></i>
+                                <span data-field="email" id="tenantEmail">john.doe@example.com</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg dark:bg-gray-700">
+                        <div class="text-sm text-gray-500 dark:text-gray-300">Lease Status</div>
+                        <div class="flex items-center mt-1">
+                            <span class="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+                            <span class="font-medium dark:text-white lease-status-indicator" id="leaseStatus">Active</span>
+                        </div>
+                        <div class="text-sm text-gray-500 dark:text-gray-300 mt-2">Until Jan 15, 2024</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                <nav class="flex space-x-8">
+                    <button class="tab-btn py-4 px-1 font-medium text-sm border-b-2 border-blue-500 text-blue-600 dark:text-blue-400" data-tab="overview">
+                        Overview
+                    </button>
+                    <button class="tab-btn py-4 px-1 font-medium text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300" data-tab="payments">
+                        Payments
+                    </button>
+                    <button class="tab-btn py-4 px-1 font-medium text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300" data-tab="documents">
+                        Documents
+                    </button>
+                    <button class="tab-btn py-4 px-1 font-medium text-sm border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300" data-tab="maintenance">
+                        Maintenance
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Tab Content -->
+            <div id="tabContent" class="space-y-6">
+                <!-- Overview Tab -->
+                <div id="overview" class="tab-panel active">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <!-- Lease Info Card -->
+                        <div class="bg-white rounded-lg shadow p-6 dark:bg-gray-800">
+                            <h3 class="text-lg font-semibold mb-4 dark:text-white">
+                                <i class="fas fa-file-contract mr-2 text-blue-500"></i>
+                                Lease Details
+                            </h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Start Date</p>
+                                    <p class="font-medium dark:text-white">Jan 15, 2023</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">End Date</p>
+                                    <p class="font-medium dark:text-white">Jan 15, 2024</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Monthly Rent</p>
+                                    <p class="font-medium dark:text-white">KSh 25,000</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Payment Due</p>
+                                    <p class="font-medium dark:text-white">5th of each month</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Emergency Contact -->
+                        <div class="bg-white rounded-lg shadow p-6 dark:bg-gray-800">
+                            <h3 class="text-lg font-semibold mb-4 dark:text-white">
+                                <i class="fas fa-user-shield mr-2 text-blue-500"></i>
+                                Emergency Contact
+                            </h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Name</p>
+                                    <p class="font-medium dark:text-white">Jane Smith</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Relationship</p>
+                                    <p class="font-medium dark:text-white">Spouse</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Phone</p>
+                                    <p class="font-medium dark:text-white">+254 700 987 654</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="bg-white rounded-lg shadow p-6 dark:bg-gray-800">
+                            <h3 class="text-lg font-semibold mb-4 dark:text-white">
+                                <i class="fas fa-history mr-2 text-blue-500"></i>
+                                Recent Activity
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <div class="p-2 rounded-full bg-green-100 text-green-600 mr-3 dark:bg-green-900 dark:text-green-300">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium dark:text-white">Rent Paid - June 2023</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">KSh 25,000 • June 3, 2023</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <div class="p-2 rounded-full bg-blue-100 text-blue-600 mr-3 dark:bg-blue-900 dark:text-blue-300">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium dark:text-white">Maintenance Request</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Leaking faucet • May 28, 2023</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tenant Notes -->
+                    <div class="bg-white rounded-lg shadow p-6 dark:bg-gray-800">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold dark:text-white">
+                                <i class="fas fa-sticky-note mr-2 text-blue-500"></i>
+                                Tenant Notes
+                            </h3>
+                            <button class="text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                                <i class="fas fa-plus mr-1"></i> Add Note
+                            </button>
+                        </div>
+                        <div class="border rounded-lg divide-y dark:border-gray-700">
+                            <div class="p-4">
+                                <div class="flex justify-between">
+                                    <p class="font-medium dark:text-white">Prefers email communication</p>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">Added: May 15, 2023</span>
+                                </div>
+                                <p class="mt-2 text-gray-600 dark:text-gray-300">Tenant requested all correspondence be sent via email rather than SMS.</p>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between">
+                                    <p class="font-medium dark:text-white">Parking space #24</p>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">Added: Jan 10, 2023</span>
+                                </div>
+                                <p class="mt-2 text-gray-600 dark:text-gray-300">Assigned parking space for this tenant.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other tabs would go here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Tenant Modal -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl dark:bg-gray-800">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white">Edit Tenant Profile</h3>
+                    <button id="closeEditModal" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="editTenantForm" class="space-y-4">
+                    <input type="hidden" id="tenantId" value="123">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="editName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
+                            <input type="text" id="editName" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" value="John Doe">
+                        </div>
+                        <div>
+                            <label for="editPhone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+                            <input type="tel" id="editPhone" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" value="+254712345678">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="editEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                        <input type="email" id="editEmail" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" value="john.doe@example.com">
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="editProperty" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Property/Unit</label>
+                            <select id="editProperty" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option>Garden Apts - Unit 4B</option>
+                                <option>Westlands Office - Suite 3</option>
+                                <option>Mombasa Beach House</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="editStatus" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lease Status</label>
+                            <select id="editStatus" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option>Active</option>
+                                <option>Pending</option>
+                                <option>Terminated</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4 flex justify-end space-x-3">
+                        <button type="button" id="cancelEdit" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching functionality
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update tab buttons
+                    document.querySelectorAll('.tab-btn').forEach(b => {
+                        b.classList.remove('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
+                        b.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+                    });
+                    this.classList.add('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
+                    this.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+                    
+                    // Show selected tab
+                    const tabId = this.dataset.tab;
+                    document.querySelectorAll('.tab-panel').forEach(panel => {
+                        panel.classList.add('hidden');
+                        panel.classList.remove('active');
+                    });
+                    document.getElementById(tabId).classList.remove('hidden');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // Edit Tenant Modal Functionality
+            const editModal = document.getElementById('editModal');
+            const editProfileBtn = document.getElementById('editProfileBtn');
+            const closeEditModal = document.getElementById('closeEditModal');
+            const cancelEdit = document.getElementById('cancelEdit');
+            const editForm = document.getElementById('editTenantForm');
+
+            function openEditModal() {
+                console.log("Opening edit modal"); // Debug log
+                
+                // Pre-fill form with current data
+                document.getElementById('editName').value = document.getElementById('tenantName').textContent;
+                document.getElementById('editPhone').value = document.getElementById('tenantPhone').textContent;
+                document.getElementById('editEmail').value = document.getElementById('tenantEmail').textContent;
+                document.getElementById('editProperty').value = document.getElementById('tenantProperty').textContent;
+                document.getElementById('editStatus').value = document.getElementById('leaseStatus').textContent;
+                
+                editModal.classList.remove('hidden');
+            }
+
+            function closeEditModalFunc() {
+                editModal.classList.add('hidden');
+            }
+
+            // Event Listeners
+            editProfileBtn.addEventListener('click', openEditModal);
+            closeEditModal.addEventListener('click', closeEditModalFunc);
+            cancelEdit.addEventListener('click', closeEditModalFunc);
+
+            // Handle form submission
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const newName = document.getElementById('editName').value;
+                const newPhone = document.getElementById('editPhone').value;
+                const newEmail = document.getElementById('editEmail').value;
+                const newProperty = document.getElementById('editProperty').value;
+                const newStatus = document.getElementById('editStatus').value;
+                
+                // Update the page
+                document.getElementById('tenantName').textContent = newName;
+                document.getElementById('tenantPhone').textContent = newPhone;
+                document.getElementById('tenantEmail').textContent = newEmail;
+                document.getElementById('tenantProperty').textContent = newProperty;
+                
+                // Update status indicator
+                const statusIndicator = document.getElementById('leaseStatus');
+                statusIndicator.textContent = newStatus;
+                
+                // Update status dot color
+                const statusDot = document.querySelector('.bg-blue-50 .w-3.h-3');
+                if (newStatus === 'Active') {
+                    statusDot.classList.remove('bg-yellow-500', 'bg-red-500');
+                    statusDot.classList.add('bg-green-500');
+                } else if (newStatus === 'Pending') {
+                    statusDot.classList.remove('bg-green-500', 'bg-red-500');
+                    statusDot.classList.add('bg-yellow-500');
+                } else {
+                    statusDot.classList.remove('bg-green-500', 'bg-yellow-500');
+                    statusDot.classList.add('bg-red-500');
+                }
+                
+                // Show success message
+                alert('Tenant profile updated successfully!');
+                closeEditModalFunc();
+            });
+
+            // Initialize first tab as active
+            document.querySelector('.tab-btn').click();
+        });
+    </script>
+</body>
+</html>

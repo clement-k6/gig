@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentEase - Email Notifications</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css"> <!-- Add this line -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar {
+            transition: all 0.3s;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar.collapsed .sidebar-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+        }
+        .content-area {
+            transition: all 0.3s;
+        }
+        .content-area.expanded {
+            margin-left: 80px;
+        }
+        .notification-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+        .tab-active {
+            border-bottom: 3px solid #2563eb;
+            color: #2563eb;
+            font-weight: 600;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                z-index: 50;
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .content-area {
+                margin-left: 0 !important;
+            }
+        }
+        .modal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-content {
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+        .email-preview {
+            border-left: 4px solid transparent;
+            transition: all 0.2s;
+        }
+        .email-preview.unread {
+            border-left-color: #2563eb;
+            background-color: #f8fafc;
+        }
+        .email-preview:hover {
+            background-color: #f1f5f9;
+        }
+        .email-preview.selected {
+            background-color: #e0e7ff;
+        }
+        .email-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .email-content.expanded {
+            max-height: 1000px;
+        }
+        .checkbox-circle {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #cbd5e1;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .checkbox-circle:checked {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+           /* Add to <style> section */
+         @media (max-width: 768px) {
+        .table-header { display: none; }
+         td { display: block; }
+        }
+    </style>
+</head>
+<script>
+    // Check for saved theme preference when any page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const darkModeEnabled = localStorage.getItem('darkMode') === 'enabled';
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        
+        // Apply theme if enabled
+        if (darkModeEnabled) {
+            document.documentElement.classList.add('dark-mode');
+            if (darkModeToggle) darkModeToggle.checked = true;
+        }
+        
+        // Theme toggle functionality (only add if toggle exists on page)
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.documentElement.classList.add('dark-mode');
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    document.documentElement.classList.remove('dark-mode');
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+            });
+        }
+    });
+</script>
+<body class="bg-gray-100 font-sans">
+    <!-- Mobile Menu Button -->
+    <div class="md:hidden fixed top-4 left-4 z-50">
+        <button id="mobileMenuBtn" class="p-2 rounded-md bg-blue-600 text-white">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar fixed h-screen bg-blue-800 text-white w-64 flex flex-col">
+        <!-- Logo -->
+        <div class="p-4 flex items-center space-x-2 border-b border-blue-700">
+            <i class="fas fa-home text-2xl"></i>
+            <span class="logo-text text-xl font-bold">RentEase</span>
+        </div>
+
+        <!-- User Profile -->
+        <div class="p-4 flex items-center space-x-3 border-b border-blue-700">
+            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="sidebar-text">
+                <div class="font-medium">Admin User</div>
+                <div class="text-xs text-blue-200">Landlord</div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1 px-2">
+                <li>
+                    <a href="dashboard.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="tenants.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-users"></i>
+                        <span class="sidebar-text">Tenants</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="properties.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-home"></i>
+                        <span class="sidebar-text">Properties</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="rentpayments.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span class="sidebar-text">Rent Payments</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="waterbills.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-tint"></i>
+                        <span class="sidebar-text">Water Bills</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="notifications.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg bg-blue-700">
+                        <i class="fas fa-envelope"></i>
+                        <span class="sidebar-text">Email Notifications</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="statements.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span class="sidebar-text">Statements</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-cog"></i>
+                        <span class="sidebar-text">Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Collapse Button -->
+        <div class="p-4 border-t border-blue-700">
+            <button id="toggleSidebar" class="flex items-center space-x-3 text-blue-200 hover:text-white">
+                <i class="fas fa-chevron-left"></i>
+                <span class="sidebar-text">Collapse</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="contentArea" class="content-area min-h-screen ml-64">
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm">
+            <div class="flex justify-between items-center p-4">
+                <h1 class="text-2xl font-bold text-gray-800">Email Notifications</h1>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button class="p-2 rounded-full hover:bg-gray-100">
+                            <i class="fas fa-bell text-gray-600"></i>
+                            <span class="notification-badge bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                        </button>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span class="hidden md:inline">Admin User</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-6">
+            <!-- Notification Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                            <i class="fas fa-envelope text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Total Notifications</p>
+                            <h3 class="text-2xl font-bold">142</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-3 rounded-full bg-green-100 text-green-600">
+                            <i class="fas fa-check-circle text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Read Notifications</p>
+                            <h3 class="text-2xl font-bold">118</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-3 rounded-full bg-red-100 text-red-600">
+                            <i class="fas fa-exclamation-circle text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Unread Notifications</p>
+                            <h3 class="text-2xl font-bold">24</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Controls -->
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="selectAllNotifications" class="checkbox-circle">
+                        <label for="selectAllNotifications" class="text-sm font-medium text-gray-700">Select all</label>
+                    </div>
+                     <div class="flex items-center space-x-2">
+                         <select class="border rounded-lg px-3 py-1 text-sm">
+                               <option>Filter by Property</option>
+                               <option>Garden Apartments</option>
+                               <option>Westlands Office</option>
+                         </select>
+                       <input type="text" placeholder="Search..." class="border rounded-lg px-3 py-1 text-sm w-40">
+                     </div>
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center space-x-2">
+                            <i class="fas fa-check"></i>
+                            <span>Mark as Read</span>
+                        </button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm flex items-center space-x-2">
+                            <i class="fas fa-trash"></i>
+                            <span>Delete Selected</span>
+                        </button>
+                        <button id="composeNewBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm flex items-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Compose New</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Tabs -->
+            <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
+                <div class="border-b border-gray-200">
+                    <nav class="flex -mb-px">
+                        <button class="tab-button py-4 px-6 text-center border-b-2 font-medium text-sm" data-tab="all">
+                            <i class="fas fa-inbox mr-2"></i>
+                            All Notifications
+                        </button>
+                        <button class="tab-button py-4 px-6 text-center border-b-2 font-medium text-sm" data-tab="unread">
+                            <i class="fas fa-envelope mr-2"></i>
+                            Unread
+                            <span class="ml-2 bg-blue-600 text-white text-xs py-0.5 px-2 rounded-full">24</span>
+                        </button>
+                        <button class="tab-button py-4 px-6 text-center border-b-2 font-medium text-sm" data-tab="sent">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            Sent
+                        </button>
+                        <button class="tab-button py-4 px-6 text-center border-b-2 font-medium text-sm" data-tab="drafts">
+                            <i class="fas fa-file-alt mr-2"></i>
+                            Drafts
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Notification List -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="divide-y divide-gray-200">
+                    <!-- Notification Item 1 -->
+                    <div class="email-preview unread p-4 hover:cursor-pointer" data-id="1">
+                        <div class="flex items-start">
+                            <input type="checkbox" class="checkbox-circle mt-1 mr-3">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        <span class="text-blue-600">John Doe</span> - Rent Payment Reminder
+                                    </p>
+                                    <p class="text-xs text-gray-500 ml-2 whitespace-nowrap">2 hours ago</p>
+                                </div>
+                                <p class="text-sm text-gray-500 truncate">
+                                    Hi Admin, this is a reminder that rent for Property A is due in 3 days...
+                                </p>
+                            </div>
+                        </div>
+                        <div class="email-content mt-2 pl-9">
+                            <div class="text-sm text-gray-700">
+                                <p>Dear Admin,</p>
+                                <p class="mt-2">This is a friendly reminder that the rent payment for Property A (Unit 4B) is due in 3 days (June 15, 2023). The amount due is KSh 25,000.</p>
+                                <p class="mt-2">Please ensure the payment is made on time to avoid any late fees. You can make the payment via M-Pesa Paybill 123456, Account Number JD001.</p>
+                                <p class="mt-2">Best regards,<br>John Doe</p>
+                            </div>
+                            <div class="mt-4 flex space-x-3">
+                                <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                                    <i class="fas fa-reply mr-1"></i> Reply
+                                </button>
+                                <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300">
+                                    <i class="fas fa-forward mr-1"></i> Forward
+                                </button>
+                                <button class="px-3 py-1 bg-red-100 text-red-600 rounded text-sm hover:bg-red-200">
+                                    <i class="fas fa-trash mr-1"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notification Item 2 -->
+                    <div class="email-preview p-4 hover:cursor-pointer" data-id="2">
+                        <div class="flex items-start">
+                            <input type="checkbox" class="checkbox-circle mt-1 mr-3">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        <span class="text-blue-600">Sarah Johnson</span> - Water Bill Payment Confirmation
+                                    </p>
+                                    <p class="text-xs text-gray-500 ml-2 whitespace-nowrap">1 day ago</p>
+                                </div>
+                                <p class="text-sm text-gray-500 truncate">
+                                    Hello, I've just paid the water bill for June. Here's the confirmation...
+                                </p>
+                            </div>
+                        </div>
+                        <div class="email-content mt-2 pl-9">
+                            <div class="text-sm text-gray-700">
+                                <p>Hello Admin,</p>
+                                <p class="mt-2">I wanted to inform you that I've just paid the water bill for June 2023. Here are the payment details:</p>
+                                <ul class="mt-2 list-disc list-inside">
+                                    <li>Amount: KSh 1,850</li>
+                                    <li>M-Pesa Transaction ID: NLX45H89J2</li>
+                                    <li>Payment Date: June 12, 2023 at 10:45 AM</li>
+                                </ul>
+                                <p class="mt-2">Please let me know if you need any additional information.</p>
+                                <p class="mt-2">Regards,<br>Sarah Johnson</p>
+                            </div>
+                            <div class="mt-4 flex space-x-3">
+                                <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                                    <i class="fas fa-reply mr-1"></i> Reply
+                                </button>
+                                <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300">
+                                    <i class="fas fa-forward mr-1"></i> Forward
+                                </button>
+                                <button class="px-3 py-1 bg-red-100 text-red-600 rounded text-sm hover:bg-red-200">
+                                    <i class="fas fa-trash mr-1"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notification Item 3 -->
+                    <div class="email-preview unread p-4 hover:cursor-pointer" data-id="3">
+                        <div class="flex items-start">
+                            <input type="checkbox" class="checkbox-circle mt-1 mr-3">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        <span class="text-blue-600">System Alert</span> - Maintenance Request Submitted
+                                    </p>
+                                    <p class="text-xs text-gray-500 ml-2 whitespace-nowrap">3 days ago</p>
+                                </div>
+                                <p class="text-sm text-gray-500 truncate">
+                                    A new maintenance request has been submitted for Property B...
+                                </p>
+                            </div>
+                        </div>
+                        <div class="email-content mt-2 pl-9">
+                            <div class="text-sm text-gray-700">
+                                <p>Dear Admin,</p>
+                                <p class="mt-2">A new maintenance request has been submitted by tenant Michael Brown for Property B (Apartment 3C). Here are the details:</p>
+                                <ul class="mt-2 list-disc list-inside">
+                                    <li>Issue: Leaking kitchen faucet</li>
+                                    <li>Urgency: Medium</li>
+                                    <li>Request Date: June 10, 2023</li>
+                                    <li>Preferred Contact Time: 2pm-5pm weekdays</li>
+                                </ul>
+                                <p class="mt-2">Please review this request and schedule the necessary repairs at your earliest convenience.</p>
+                                <p class="mt-2">This is an automated notification from RentEase.</p>
+                            </div>
+                            <div class="mt-4 flex space-x-3">
+                                <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                                    <i class="fas fa-reply mr-1"></i> Reply
+                                </button>
+                                <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300">
+                                    <i class="fas fa-forward mr-1"></i> Forward
+                                </button>
+                                <button class="px-3 py-1 bg-red-100 text-red-600 rounded text-sm hover:bg-red-200">
+                                    <i class="fas fa-trash mr-1"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="bg-gray-50 px-6 py-3 flex items-center justify-between border-t border-gray-200">
+                    <div class="text-sm text-gray-500">
+                        Showing <span class="font-medium">1</span> to <span class="font-medium">3</span> of <span class="font-medium">24</span> notifications
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 border rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            Previous
+                        </button>
+                        <button class="px-3 py-1 border rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                            1
+                        </button>
+                        <button class="px-3 py-1 border rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            2
+                        </button>
+                        <button class="px-3 py-1 border rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Compose Email Modal -->
+    <div id="composeModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 invisible">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Compose New Email</h3>
+                    <button id="closeComposeModalBtn" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">To</label>
+                        <select class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Select Tenant</option>
+                            <option value="1">John Doe (Property A - Unit 4B)</option>
+                            <option value="2">Sarah Johnson (Property B - Apartment 2A)</option>
+                            <option value="3">Michael Brown (Property B - Apartment 3C)</option>
+                            <option value="4">All Tenants</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                        <input type="text" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter subject...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                        <textarea rows="10" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Type your message here..."></textarea>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="saveAsDraft" class="rounded text-blue-600 focus:ring-blue-500">
+                        <label for="saveAsDraft" class="text-sm font-medium text-gray-700">Save as draft</label>
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" id="cancelComposeBtn" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Send Email
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+
+        // Sidebar collapse/expand
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const contentArea = document.getElementById('contentArea');
+            
+            sidebar.classList.toggle('collapsed');
+            contentArea.classList.toggle('expanded');
+            
+            // Change icon and text
+            const icon = this.querySelector('i');
+            const text = this.querySelector('.sidebar-text');
+            
+            if (sidebar.classList.contains('collapsed')) {
+                icon.classList.remove('fa-chevron-left');
+                icon.classList.add('fa-chevron-right');
+                text.textContent = 'Expand';
+            } else {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-left');
+                text.textContent = 'Collapse';
+            }
+        });
+
+        // Tab switching
+        const tabButtons = document.querySelectorAll('.tab-button');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                tabButtons.forEach(btn => btn.classList.remove('tab-active'));
+                // Add active class to clicked button
+                this.classList.add('tab-active');
+                // Here you would typically load content for the selected tab
+                const tab = this.getAttribute('data-tab');
+                console.log('Switched to tab:', tab);
+            });
+        });
+
+        // Set first tab as active by default
+        if (tabButtons.length > 0) {
+            tabButtons[0].classList.add('tab-active');
+        }
+
+        // Email preview toggle
+        const emailPreviews = document.querySelectorAll('.email-preview');
+        emailPreviews.forEach(preview => {
+            preview.addEventListener('click', function(e) {
+                // Don't toggle if clicking on a button or checkbox
+                if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') {
+                    return;
+                }
+                
+                const content = this.querySelector('.email-content');
+                content.classList.toggle('expanded');
+                
+                // Mark as read when expanded
+                if (content.classList.contains('expanded')) {
+                    this.classList.remove('unread');
+                }
+            });
+        });
+
+        // Checkbox selection
+        document.getElementById('selectAllNotifications').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.email-preview .checkbox-circle');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+                
+                // Highlight selected emails
+                const emailPreview = checkbox.closest('.email-preview');
+                if (this.checked) {
+                    emailPreview.classList.add('selected');
+                } else {
+                    emailPreview.classList.remove('selected');
+                }
+            });
+        });
+
+        // Compose modal
+        document.getElementById('composeNewBtn').addEventListener('click', function() {
+            document.getElementById('composeModal').classList.add('active');
+        });
+
+        document.getElementById('closeComposeModalBtn').addEventListener('click', function() {
+            document.getElementById('composeModal').classList.remove('active');
+        });
+
+        document.getElementById('cancelComposeBtn').addEventListener('click', function() {
+            document.getElementById('composeModal').classList.remove('active');
+        });
+
+        // Close modals when clicking outside
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+        //persist read/unread states
+document.querySelectorAll('.email-preview').forEach(preview => {
+    preview.addEventListener('click', function() {
+        if (this.classList.contains('unread')) {
+            const id = this.dataset.id;
+            localStorage.setItem(`email-${id}-read`, 'true');
+        }
+    });
+});
+    </script>
+</body>
+</html>

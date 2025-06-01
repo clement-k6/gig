@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentEase - Properties Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css"> <!-- Add this line -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar {
+            transition: all 0.3s;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar.collapsed .sidebar-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+        }
+        .content-area {
+            transition: all 0.3s;
+        }
+        .content-area.expanded {
+            margin-left: 80px;
+        }
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+        .map-container {
+            height: 300px;
+            background-image: url('https://maps.googleapis.com/maps/api/staticmap?center=Nairobi,Kenya&zoom=12&size=600x300&maptype=roadmap&key=YOUR_API_KEY');
+            background-size: cover;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                z-index: 50;
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .content-area {
+                margin-left: 0 !important;
+            }
+        }
+           /* Add to <style> section */
+         @media (max-width: 768px) {
+        .table-header { display: none; }
+         td { display: block; }
+        }
+    </style>
+</head>
+<script>
+    // Check for saved theme preference when any page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const darkModeEnabled = localStorage.getItem('darkMode') === 'enabled';
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        
+        // Apply theme if enabled
+        if (darkModeEnabled) {
+            document.documentElement.classList.add('dark-mode');
+            if (darkModeToggle) darkModeToggle.checked = true;
+        }
+        
+        // Theme toggle functionality (only add if toggle exists on page)
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.documentElement.classList.add('dark-mode');
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    document.documentElement.classList.remove('dark-mode');
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+            });
+        }
+    });
+</script>
+<body class="bg-gray-100 font-sans">
+    <!-- Mobile Menu Button -->
+    <div class="md:hidden fixed top-4 left-4 z-50">
+        <button id="mobileMenuBtn" class="p-2 rounded-md bg-blue-600 text-white">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar (Same as Dashboard) -->
+    <div id="sidebar" class="sidebar fixed h-screen bg-blue-800 text-white w-64 flex flex-col">
+        <!-- Logo -->
+        <div class="p-4 flex items-center space-x-2 border-b border-blue-700">
+            <i class="fas fa-home text-2xl"></i>
+            <span class="logo-text text-xl font-bold">RentEase</span>
+        </div>
+
+        <!-- User Profile -->
+        <div class="p-4 flex items-center space-x-3 border-b border-blue-700">
+            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="sidebar-text">
+                <div class="font-medium">Admin User</div>
+                <div class="text-xs text-blue-200">Landlord</div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1 px-2">
+                <li>
+                    <a href="dashboard.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="tenants.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-users"></i>
+                        <span class="sidebar-text">Tenants</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="properties.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg bg-blue-700">
+                        <i class="fas fa-home"></i>
+                        <span class="sidebar-text">Properties</span>
+                    </a>
+                </li>
+                <!-- Other menu items same as dashboard -->
+                  <li>
+                    <a href="rentpayments.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span class="sidebar-text">Rent Payments</span>
+                        <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">3 New</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="waterbills.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-tint"></i>
+                        <span class="sidebar-text">Water Bills</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="notifications.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-envelope"></i>
+                        <span class="sidebar-text">Email Notifications</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="statements.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span class="sidebar-text">Statements</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.html" class="nav-item flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-cog"></i>
+                        <span class="sidebar-text">Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Collapse Button -->
+        <div class="p-4 border-t border-blue-700">
+            <button id="toggleSidebar" class="flex items-center space-x-3 text-blue-200 hover:text-white">
+                <i class="fas fa-chevron-left"></i>
+                <span class="sidebar-text">Collapse</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="contentArea" class="content-area min-h-screen ml-64">
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm">
+            <div class="flex justify-between items-center p-4">
+                <h1 class="text-2xl font-bold text-gray-800">Properties Management</h1>
+                <div class="flex items-center space-x-4">
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Add Property
+                    </button>
+                    <div class="relative">
+                        <button class="p-2 rounded-full hover:bg-gray-100">
+                            <i class="fas fa-bell text-gray-600"></i>
+                            <span class="notification-badge bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-6">
+            <!-- Property Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="property-card bg-white rounded-lg shadow p-6 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500">Total Properties</p>
+                            <h3 class="text-2xl font-bold">8</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                            <i class="fas fa-building"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Occupied</span>
+                            <span class="font-medium">6 (75%)</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: 75%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="property-card bg-white rounded-lg shadow p-6 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500">Annual Rental Income</p>
+                            <h3 class="text-2xl font-bold">KSh 2.4M</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-green-100 text-green-600">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm text-green-600">
+                        <i class="fas fa-arrow-up"></i> 12% from last year
+                    </div>
+                </div>
+                
+                <div class="property-card bg-white rounded-lg shadow p-6 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500">Maintenance Requests</p>
+                            <h3 class="text-2xl font-bold">3 Active</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm text-red-600">
+                        <i class="fas fa-exclamation-circle"></i> 1 urgent
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property List and Map -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <!-- Property List -->
+                <div class="lg:col-span-2 bg-white rounded-lg shadow">
+                    <div class="p-4 border-b flex justify-between items-center">
+                        <h2 class="text-lg font-semibold">Your Properties</h2>
+                        <div class="flex space-x-2">
+                            <button class="p-2 rounded hover:bg-gray-100">
+                                <i class="fas fa-filter text-gray-600"></i>
+                            </button>
+                            <button class="p-2 rounded hover:bg-gray-100">
+                                <i class="fas fa-sort text-gray-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="divide-y divide-gray-200">
+                        <!-- Property 1 -->
+                        <div class="p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+                            <div class="flex items-start">
+                                <div class="w-16 h-16 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 mr-4">
+                                    <i class="fas fa-home text-2xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between">
+                                        <h3 class="font-medium">Garden Apartments - Unit 4B</h3>
+                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Occupied</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-1">Kileleshwa, Nairobi</p>
+                                    <div class="flex mt-2 text-sm">
+                                        <div class="mr-4">
+                                            <span class="text-gray-500">Rent:</span>
+                                            <span class="font-medium ml-1">KSh 25,000</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500">Tenant:</span>
+                                            <span class="font-medium ml-1">Sarah Johnson</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Property 2 -->
+                        <div class="p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+                            <div class="flex items-start">
+                                <div class="w-16 h-16 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600 mr-4">
+                                    <i class="fas fa-building text-2xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between">
+                                        <h3 class="font-medium">Westlands Office Suite</h3>
+                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Occupied</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-1">Westlands, Nairobi</p>
+                                    <div class="flex mt-2 text-sm">
+                                        <div class="mr-4">
+                                            <span class="text-gray-500">Rent:</span>
+                                            <span class="font-medium ml-1">KSh 85,000</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500">Tenant:</span>
+                                            <span class="font-medium ml-1">Tech Solutions Ltd</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Property 3 -->
+                        <div class="p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+                            <div class="flex items-start">
+                                <div class="w-16 h-16 rounded-lg bg-yellow-100 flex items-center justify-center text-yellow-600 mr-4">
+                                    <i class="fas fa-home text-2xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between">
+                                        <h3 class="font-medium">Mombasa Beach House</h3>
+                                        <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Vacant</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-1">Nyali, Mombasa</p>
+                                    <div class="flex mt-2 text-sm">
+                                        <div class="mr-4">
+                                            <span class="text-gray-500">Rent:</span>
+                                            <span class="font-medium ml-1">KSh 45,000</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500">Last Tenant:</span>
+                                            <span class="font-medium ml-1">James Mwangi</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 border-t text-center">
+                        <button class="text-blue-600 font-medium hover:text-blue-800">View All Properties</button>
+                    </div>
+                </div>
+                
+                <!-- Property Map and Quick Stats -->
+                <div class="space-y-6">
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h2 class="text-lg font-semibold mb-3">Properties Map</h2>
+                        <div class="map-container rounded-lg overflow-hidden">
+                            <!-- In a real implementation, this would be a Google Maps embed -->
+                            <div class="h-full w-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                <i class="fas fa-map-marked-alt text-4xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-sm text-gray-600">
+                            <i class="fas fa-info-circle mr-1"></i> 3 properties in Nairobi, 1 in Mombasa
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h2 class="text-lg font-semibold mb-3">Quick Actions</h2>
+                        <div class="space-y-3">
+                            <button class="w-full flex items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3">
+                                    <i class="fas fa-file-signature"></i>
+                                </div>
+                                <span>Generate Lease Agreement</span>
+                            </button>
+                            <button class="w-full flex items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                                <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3">
+                                    <i class="fas fa-tools"></i>
+                                </div>
+                                <span>Report Maintenance</span>
+                            </button>
+                            <button class="w-full flex items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                                <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3">
+                                    <i class="fas fa-chart-pie"></i>
+                                </div>
+                                <span>View Financial Reports</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Maintenance Section -->
+            <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
+                <div class="p-4 border-b flex justify-between items-center">
+                    <h2 class="text-lg font-semibold">Active Maintenance Requests</h2>
+                    <button class="text-blue-600 text-sm font-medium">View All</button>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex items-center">
+                                    <span class="font-medium mr-2">Leaking Roof</span>
+                                    <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Urgent</span>
+                                </div>
+                                <p class="text-sm text-gray-500 mt-1">Garden Apartments - Unit 4B</p>
+                                <p class="text-sm mt-2">Reported: 2 days ago by Sarah Johnson</p>
+                            </div>
+                            <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
+                                Assign Contractor
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex items-center">
+                                    <span class="font-medium mr-2">Broken Window</span>
+                                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Medium</span>
+                                </div>
+                                <p class="text-sm text-gray-500 mt-1">Mombasa Beach House</p>
+                                <p class="text-sm mt-2">Reported: 1 week ago by caretaker</p>
+                            </div>
+                            <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Same sidebar toggle functionality as dashboard
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('contentArea').classList.toggle('expanded');
+        });
+
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+
+        // Property card hover effects
+        const propertyCards = document.querySelectorAll('.property-card');
+        propertyCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 10px 20px rgba(0,0,0,0.1)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+                this.style.boxShadow = '';
+            });
+        });
+    </script>
+</body>
+</html>
