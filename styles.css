@@ -114,3 +114,38 @@
 .dark-mode input::placeholder {
     color: #a0aec0 !important;
 }
+/* Custom styles to complement Tailwind CSS */
+.toggle-dot {
+    transition: all 0.3s ease;
+}
+
+input:checked + label .toggle-dot {
+    transform: translateX(100%);
+    background-color: #2563EB;
+}
+
+input:focus + label .toggle-dot {
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+}
+
+input:focus-visible {
+    outline: none;
+}
+
+button:focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
+}
+
+.nav-item:focus-visible {
+    outline: 2px solid #60A5FA;
+    outline-offset: 2px;
+}
+
+.dark-mode .toggle-dot {
+    background-color: #60A5FA;
+}
+
+.dark-mode input:checked + label .toggle-dot {
+    background-color: #93C5FD;
+}
